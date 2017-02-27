@@ -7,7 +7,8 @@
                  [mount "0.1.11"]
                  [cprop "0.1.9"]
                  [org.clojure/tools.logging "0.3.1"]
-                 [ch.qos.logback/logback-classic "1.1.7"]]
+                 [ch.qos.logback/logback-classic "1.1.7"]
+                 [org.clojure/tools.cli "0.3.5"]]
   :main rocks.pho.stock.analyst
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}})
