@@ -1,5 +1,25 @@
 (ns rocks.pho.stock.analyst.utils
-  (:require [clojure.tools.logging :as log]))
+  (:import (java.io FileReader)
+           (com.opencsv CSVReader))
+  (:require [clojure.tools.logging :as log]
+            [incanter.core :as incanter]
+            [clojure.data.csv :as csv]))
+
+(defn read-csv [path]
+  (let [parse-line-fn (fn [line]
+                        (vec line))
+        data (with-open [reader ^CSVReader (CSVReader. (clojure.java.io/reader path))]
+               (loop [lines []]
+                     (if-let [line (.readNext reader)]
+                       (recur (conj lines (parse-line-fn line)))
+                       lines)))
+        header (map keyword (first data))]
+    (incanter/dataset header (rest data))))
+
+(defn write-csv [data path]
+  (with-open [f-out (clojure.java.io/writer path)]
+    (csv/write-csv f-out [(map name (incanter/col-names data))])
+    (csv/write-csv f-out (incanter/to-list data))))
 
 (defn get-today-date
   []
@@ -16,3 +36,27 @@
     (catch Exception e
       (log/warn e)
       false)))
+
+(defn write-summary-one-day
+  [summary-data-path dt summary]
+  (let [today-path (str summary-data-path "/" dt)]
+    (when-not (.exists (clojure.java.io/as-file today-path))
+      (clojure.java.io/make-parents (str today-path "/test")))
+    (write-csv (:summary (:all summary))
+               (str today-path "/all"))
+    (log/info "write all csv")
+    (write-csv (:top-trans-amount (:all summary))
+               (str today-path "/all.top-trans-amount"))
+    (log/info "write all.top-trans-amount csv")
+    (write-csv (:summary (:morning summary))
+               (str today-path "/morning"))
+    (log/info "write morning csv")
+    (write-csv (:summary (:afternoon summary))
+               (str today-path "/afternoon"))
+    (log/info "write afternoon csv")
+    (write-csv (:summary (:volume-400 summary))
+               (str today-path "/volume-400"))
+    (log/info "write volume-400 csv")
+    (write-csv (:summary (:amount-10 summary))
+               (str today-path "/amount-10"))
+    (log/info "write amount-10 csv")))

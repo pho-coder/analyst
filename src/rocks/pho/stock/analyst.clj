@@ -37,8 +37,11 @@
                 (<= (Integer. (utils/get-hour)) 20))
       (log/info "check finish! NO FINISH")
       (Thread/sleep 60000))
-    (log/info "FINISH")
-    (analysis/summary-oneday data-path summary-path dt)))
+    (log/info "FINISH check")
+    (let [summary (analysis/summary-one-day data-path dt)]
+      (log/info "FINISH summary one day")
+      (utils/write-summary-one-day summary-path dt summary)
+      (log/info "finish write summary"))))
 
 (defn -main
   "I don't do a whole lot ... yet."
