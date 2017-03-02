@@ -8,4 +8,4 @@ CLASSPATH="$ANALYST_HOME/lib/*:$MASTER_JARS"
 DATA_PATH=$1
 echo $DATA_PATH
 export DATA_PATH=$DATA_PATH
-java -Duser.timezone=Asia/Shanghai -DANALYST_HOME=${ANALYST_HOME} -Dlogback.configurationFile=$ANALYST_HOME/logback.xml -cp "$CLASSPATH" rocks.pho.stock.analyst -d $DATA_PATH
+java -Duser.timezone=Asia/Shanghai -DANALYST_HOME=${ANALYST_HOME} -Dlogback.configurationFile=$ANALYST_HOME/logback.xml -cp "$CLASSPATH" rocks.pho.stock.analyst -d $DATA_PATH > $ANALYST_HOME/log/analyst.out 2>&1
