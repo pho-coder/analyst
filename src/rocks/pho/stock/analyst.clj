@@ -48,11 +48,15 @@
               (<= (Integer. (utils/get-hour)) 22))
     (log/info "check finish! NO FINISH:" data-path dt)
     (Thread/sleep 60000))
-  (log/info "FINISH check")
-  (let [summary (analysis/summary-one-day data-path dt)]
-    (log/info "FINISH summary one day")
-    (utils/write-summary-one-day summary-path dt summary)
-    (log/info "finish write summary")))
+  (if (utils/check-finish data-path dt)
+    (let [_ (log/info "FINISH check")
+          summary (analysis/summary-one-day data-path dt)]
+      (log/info "FINISH summary one day")
+      (utils/write-summary-one-day summary-path dt summary)
+      (log/info "finish write summary"))
+    (let [errors (str data-path "/" dt " NOT EXISTS!")]
+      (log/error errors)
+      (exit 1 errors))))
 
 (defn run-one
   [data-path summary-path code dt]
