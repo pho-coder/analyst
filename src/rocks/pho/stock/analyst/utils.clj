@@ -60,3 +60,25 @@
     (write-csv (:summary (:amount-10 summary))
                (str today-path "/amount-10"))
     (log/info "write amount-10 csv")))
+
+(defn str2date
+  ([date-str fm]
+   (.parse (java.text.SimpleDateFormat. fm) date-str))
+  ([date-str]
+   (str2date date-str "yyyy-MM-dd")))
+
+(defn date2str
+  ([date fm]
+   (.format (java.text.SimpleDateFormat. fm) date))
+  ([date]
+   (date2str date "yyyy-MM-dd")))
+
+(defn calendar-add-days
+  ([date-str days fm]
+   (let [cal (java.util.Calendar/getInstance)
+         date (str2date date-str fm)]
+     (.setTime cal date)
+     (.add cal (java.util.Calendar/DAY_OF_MONTH) days)
+     (date2str (.getTime cal) fm)))
+  ([date-str days]
+   (calendar-add-days date-str days "yyyy-MM-dd")))

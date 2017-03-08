@@ -118,3 +118,23 @@
      :afternoon afternoon
      :volume-400 volume-400
      :amount-10 amount-10}))
+
+(defn analysis-one-some-days [data-path start-dt end-dt]
+  (let [analysis-re (loop [dt start-dt
+                           re []]
+                      (if (> (compare dt end-dt)
+                             0)
+                        re
+                        (let [data (str data-path "/" dt ".csv")]
+                          (if (.exists (clojure.java.io/as-file data))
+                            (recur (utils/calendar-add-days dt 1)
+                                   (conj re (assoc (analysis-one (utils/read-csv data))
+                                                   :dt dt)))
+                            (recur (utils/calendar-add-days dt 1)
+                                   re)))))
+        re-dealed (map (fn [one]
+                         (let [total (+ (:buy-trans-amount one)
+                                        (:sell-trans-amount one)
+                                        (:normal-trans-amount one))]
+                           (assoc one :buy-trans-rate (with-precision)))) analysis-re)]
+    analysis-re))
