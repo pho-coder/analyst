@@ -12,7 +12,16 @@
                                  end-time "15:30:00"}}]
   (let [cleaned-data-volume (incanter/add-derived-column :volume-int [:volume] #(Integer. %) data)
         cleaned-data (incanter/add-derived-column :amount-int [:amount] #(Integer. %) cleaned-data-volume)
-        first-price {:price (Float/parseFloat (last cleaned-data))}
+        first-one (incanter/tail 1 cleaned-data)
+        first-trans {:time (incanter/$ 0 :time first-one)
+                     :price (Float/parseFloat (incanter/$ 0 :price first-one))
+                     :volume (incanter/$ 0 :volume-int first-one)
+                     :amount (incanter/$ 0 :amount-int first-one)}
+        last-one (incanter/head 1 cleaned-data)
+        last-trans {:time (incanter/$ 0 :time last-one)
+                    :price (Float/parseFloat (incanter/$ 0 :price last-one))
+                    :volume (incanter/$ 0 :volume-int last-one)
+                    :amount (incanter/$ 0 :amount-int last-one)}
         time-filtered-data (incanter/$where {:time {:$fn (fn [t]
                                                            (and (>= (compare t start-time)
                                                                     0)
@@ -43,7 +52,9 @@
     {:type type
      :buy-trans-amount big-buy-trans-amount
      :sell-trans-amount big-sell-trans-amount
-     :normal-trans-amount big-normal-trans-amount}))
+     :normal-trans-amount big-normal-trans-amount
+     :first-trans first-trans
+     :last-trans last-trans}))
 
 (defn analysis-one-day [path dt & {:keys [big-amount big-volume start-time end-time top]
                                    :or {big-amount 0
@@ -120,7 +131,9 @@
      :volume-400 volume-400
      :amount-10 amount-10}))
 
-(defn analysis-one-some-days [data-path start-dt end-dt]
+(defn analysis-one-some-days [data-path start-dt end-dt & {:keys [big-amount big-volume]
+                                                           :or {big-amount 100000
+                                                                big-volume 0}}]
   (let [analysis-re (loop [dt start-dt
                            re []]
                       (if (> (compare dt end-dt)
@@ -140,17 +153,23 @@
                            (assoc one
                                   :buy-trans-rate (with-precision 2 (/ (:buy-trans-amount one) total-amount))
                                   :sell-trans-rate (with-precision 2 (/ (:sell-trans-amount one) total-amount))
-                                  :normal-trans-rate (with-precision 2 (/ (:normal-trans-amount one) total-amount))))) analysis-re)]
+                                  :normal-trans-rate (with-precision 2 (/ (:normal-trans-amount one) total-amount))
+                                  :first-price (:price (:first-trans one))
+                                  :last-price (:price (:last-trans one))))) analysis-re)]
     re-dealed))
 
 (defn prn-analysis-one-some-days [data-path start-dt end-dt]
   (let [re (analysis-one-some-days data-path start-dt end-dt)]
     (doseq [one re]
-      (prn (str (:type one) "---"
+      (prn (str (:dt one) "---"
+                (utils/date2week (:dt one)) "---"
+                (:type one) "---"
                 (with-precision 3 (/ (:buy-trans-amount one)
                                      100000000M)) "亿---"
                 (:buy-trans-rate one) "---"
                 (with-precision 3 (/ (:sell-trans-amount one)
                                      100000000M)) "亿---"
                 (:sell-trans-rate one) "---"
-                (:normal-trans-rate one))))))
+                (:normal-trans-rate one) "---"
+                (:first-price one) "---"
+                (:last-price one))))))

@@ -82,3 +82,13 @@
      (date2str (.getTime cal) fm)))
   ([date-str days]
    (calendar-add-days date-str days "yyyy-MM-dd")))
+
+(defn date2week
+  ([date-str fm]
+   (let [cal (java.util.Calendar/getInstance)
+         date (str2date date-str fm)
+         weeks (list "星期日" "星期一" "星期二" "星期三" "星期四" "星期五" "星期六")]
+     (.setTime cal date)
+     (nth weeks (dec (.get cal java.util.Calendar/DAY_OF_WEEK)))))
+  ([date-str]
+   (date2week date-str "yyyy-MM-dd")))
