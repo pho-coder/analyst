@@ -12,6 +12,7 @@
                                  end-time "15:30:00"}}]
   (let [cleaned-data-volume (incanter/add-derived-column :volume-int [:volume] #(Integer. %) data)
         cleaned-data (incanter/add-derived-column :amount-int [:amount] #(Integer. %) cleaned-data-volume)
+        first-price {:price (Float/parseFloat (last cleaned-data))}
         time-filtered-data (incanter/$where {:time {:$fn (fn [t]
                                                            (and (>= (compare t start-time)
                                                                     0)
@@ -133,8 +134,23 @@
                             (recur (utils/calendar-add-days dt 1)
                                    re)))))
         re-dealed (map (fn [one]
-                         (let [total (+ (:buy-trans-amount one)
-                                        (:sell-trans-amount one)
-                                        (:normal-trans-amount one))]
-                           (assoc one :buy-trans-rate (with-precision)))) analysis-re)]
-    analysis-re))
+                         (let [total-amount (bigdec (+ (:buy-trans-amount one)
+                                                       (:sell-trans-amount one)
+                                                       (:normal-trans-amount one)))]
+                           (assoc one
+                                  :buy-trans-rate (with-precision 2 (/ (:buy-trans-amount one) total-amount))
+                                  :sell-trans-rate (with-precision 2 (/ (:sell-trans-amount one) total-amount))
+                                  :normal-trans-rate (with-precision 2 (/ (:normal-trans-amount one) total-amount))))) analysis-re)]
+    re-dealed))
+
+(defn prn-analysis-one-some-days [data-path start-dt end-dt]
+  (let [re (analysis-one-some-days data-path start-dt end-dt)]
+    (doseq [one re]
+      (prn (str (:type one) "---"
+                (with-precision 3 (/ (:buy-trans-amount one)
+                                     100000000M)) "亿---"
+                (:buy-trans-rate one) "---"
+                (with-precision 3 (/ (:sell-trans-amount one)
+                                     100000000M)) "亿---"
+                (:sell-trans-rate one) "---"
+                (:normal-trans-rate one))))))
