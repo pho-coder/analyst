@@ -11,7 +11,13 @@
 (def cli-options
   [["-d" "--dt date" "date"
     :default (utils/get-today-date)]
-   ["-c" "--code code"]
+   ["-c" "--code code" "code"]
+   ["-s" "--start-dt dt" "start dt"]
+   ["-e" "--end-dt dt" "end dt"]
+   ["-a" "--big-amount amount" "big amount"
+    :default 0]
+   ["-v" "--big-volume volume" "big volume"
+    :default 0]
    ["-h" "--help"]])
 
 (defn usage [options-summary]
@@ -59,8 +65,13 @@
       (exit 1 errors))))
 
 (defn run-one
-  [data-path summary-path code dt]
-  (log/info data-path summary-path code))
+  [data-path summary-path code start-dt end-dt big-amount big-volume]
+  (log/info data-path summary-path code start-dt end-dt big-amount big-volume)
+  (analysis/prn-analysis-one-some-days (str data-path "/" code)
+                                       start-dt
+                                       end-dt
+                                       big-amount
+                                       big-volume))
 
 (defn -main
   "I don't do a whole lot ... yet."
@@ -87,5 +98,5 @@
       (log/info "summary path:" summary-path)
       (case (first arguments)
         "hs300s" (run-hs300s data-path summary-path dt)
-        "one" (run-one data-path summary-path (:code options) dt)
+        "one" (run-one data-path summary-path (:code options) (:start-dt options) (:end-dt options) (:big-amount options) (:big-volume options))
         (exit 1 (usage summary))))))

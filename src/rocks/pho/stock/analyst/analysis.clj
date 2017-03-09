@@ -158,8 +158,8 @@
                                   :last-price (:price (:last-trans one))))) analysis-re)]
     re-dealed))
 
-(defn prn-analysis-one-some-days [data-path start-dt end-dt]
-  (let [re (analysis-one-some-days data-path start-dt end-dt)]
+(defn prn-analysis-one-some-days [data-path start-dt end-dt big-amount big-volume]
+  (let [re (analysis-one-some-days data-path start-dt end-dt big-amount big-volume)]
     (doseq [one re]
       (prn (str (:dt one) "---"
                 (utils/date2week (:dt one)) "---"
