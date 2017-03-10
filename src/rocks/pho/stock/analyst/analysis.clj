@@ -142,7 +142,7 @@
                         (let [data (str data-path "/" dt ".csv")]
                           (if (.exists (clojure.java.io/as-file data))
                             (recur (utils/calendar-add-days dt 1)
-                                   (conj re (assoc (analysis-one (utils/read-csv data))
+                                   (conj re (assoc (analysis-one (utils/read-csv data) :big-amount big-amount :big-volume big-volume)
                                                    :dt dt)))
                             (recur (utils/calendar-add-days dt 1)
                                    re)))))
@@ -159,7 +159,7 @@
     re-dealed))
 
 (defn prn-analysis-one-some-days [data-path start-dt end-dt big-amount big-volume]
-  (let [re (analysis-one-some-days data-path start-dt end-dt big-amount big-volume)]
+  (let [re (analysis-one-some-days data-path start-dt end-dt :big-amount big-amount :big-volume big-volume)]
     (doseq [one re]
       (prn (str (:dt one) "---"
                 (utils/date2week (:dt one)) "---"

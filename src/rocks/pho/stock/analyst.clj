@@ -15,9 +15,11 @@
    ["-s" "--start-dt dt" "start dt"]
    ["-e" "--end-dt dt" "end dt"]
    ["-a" "--big-amount amount" "big amount"
-    :default 0]
+    :default 0
+    :parse-fn #(Integer/parseInt %)]
    ["-v" "--big-volume volume" "big volume"
-    :default 0]
+    :default 0
+    :parse-fn #(Integer/parseInt %)]
    ["-h" "--help"]])
 
 (defn usage [options-summary]
